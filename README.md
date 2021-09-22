@@ -1,1 +1,1 @@
-# image-finder-react-js
+Image finder app
