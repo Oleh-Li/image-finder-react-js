@@ -6,6 +6,7 @@ import ImageGallery from "./imageGallery/ImageGallery";
 import Spinner from "./loader/Loader";
 import ErrorNotification from "./errorNotification/ErrorNotification";
 import Button from "./button/Button";
+import Modal from "./modal/Modal";
 
 const mapper = (articles) => {
   return articles.map(({ webformatURL: url, type: alt, ...props }) => ({
@@ -15,18 +16,41 @@ const mapper = (articles) => {
   }));
 };
 
+window.scrollTo({
+  top: document.documentElement.scrollHeight,
+  behavior: "smooth",
+});
+
 export default class App extends Component {
   state = {
     isLoading: false,
-    photos: [],
     error: null,
+    photos: [],
     pageNum: 1,
     inputValue: "dog",
+    isModalOpen: false,
+    largeImageURL: "",
   };
 
   componentDidMount() {
     this.fetchPhotos();
   }
+
+  closeModal = () => {
+    this.setState({ isModalOpen: false });
+  };
+
+  findLargeImage = (arr, param) => {
+    return arr.find((elem) => elem.id.toString() === param);
+  };
+
+  onLargeImageURL = (id) => {
+    const largeUrl = this.findLargeImage(this.state.photos, id).largeImageURL;
+    this.setState({
+      largeImageURL: largeUrl,
+      isModalOpen: true,
+    });
+  };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.pageNum !== this.state.pageNum) {
@@ -62,7 +86,8 @@ export default class App extends Component {
   };
 
   render() {
-    const { photos, isLoading, error, inputValue } = this.state;
+    const { photos, isLoading, error, inputValue, isModalOpen, largeImageURL } =
+      this.state;
     return (
       <div className="App">
         {error && <ErrorNotification text={error.response.data} />}
@@ -71,8 +96,17 @@ export default class App extends Component {
         <Searchbar onSubmit={this.fetchPhotos} queryChange={this.queryChange} />
         {photos.length > 0 && inputValue && (
           <Fragment>
-            <ImageGallery dataPhotoArr={photos} />
+            <ImageGallery
+              dataPhotoArr={photos}
+              onLargeImageURL={this.onLargeImageURL}
+            />
             <Button loadMore={this.loadMore} />
+            {isModalOpen && (
+              <Modal
+                closeModal={this.closeModal}
+                largeImageURL={largeImageURL}
+              />
+            )}
           </Fragment>
         )}
       </div>

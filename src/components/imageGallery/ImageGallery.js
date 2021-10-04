@@ -1,25 +1,36 @@
+import { Component, createRef } from "react";
 import styles from "./imageGallery.module.css";
+import ImageGalleryItem from "../imageGalleryItem/ImageGalleryItem";
 import PropTypes from "prop-types";
 
-const ImageGallery = ({ dataPhotoArr }) => {
-  const photosArr = dataPhotoArr.map(({ id, url, alt }) => {
+export default class ImageGallery extends Component {
+  listRef = createRef();
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.dataPhotoArr !== prevProps.dataPhotoArr) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }
+  render() {
+    const { dataPhotoArr, onLargeImageURL } = this.props;
     return (
-      <li key={id} className={styles.ImageGalleryItem}>
-        <img src={url} alt={alt} className={styles.ImageGalleryItemImage} />
-      </li>
+      <ul
+        ref={this.listRef}
+        className={styles.ImageGallery}
+        onClick={this.handleClicklPic}
+      >
+        <ImageGalleryItem
+          photos={dataPhotoArr}
+          onLargeImageURL={onLargeImageURL}
+        />
+      </ul>
     );
-  });
-  return <ul className={styles.ImageGallery}>{photosArr}</ul>;
-};
+  }
+}
 
 ImageGallery.propTypes = {
-  dataPhotoArr: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      url: PropTypes.string.isRequired,
-      alr: PropTypes.string.isRequired,
-    })
-  ),
+  dataPhotoArr: PropTypes.array.isRequired,
+  onLargeImageURL: PropTypes.func.isRequired,
 };
-
-export default ImageGallery;
